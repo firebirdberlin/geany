@@ -1459,6 +1459,7 @@ G_MODULE_EXPORT void on_menu_open_selected_file1_activate(GtkMenuItem *menuitem,
 	sel = editor_get_default_selection(doc->editor, TRUE, wc);
 	SETPTR(sel, utils_get_locale_from_utf8(sel));
 
+
 	if (sel != NULL)
 	{
 		gchar *filename = NULL;
@@ -1466,14 +1467,13 @@ G_MODULE_EXPORT void on_menu_open_selected_file1_activate(GtkMenuItem *menuitem,
 		if (g_path_is_absolute(sel))
 		{
 			filename = g_strdup(sel);
-			if ( ! g_file_test(filename, G_FILE_TEST_EXISTS)){
-				/* maybe we have to add an extension */
+
+			if ( ! g_file_test(filename, G_FILE_TEST_EXISTS)) // with ext ?
 				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
-			}
 		}
 		else
 		{	/* relative filename, add the path of the current file */
-			gchar *path;
+			gchar *path = NULL;
 
 			path = utils_get_current_file_dir_utf8();
 			SETPTR(path, utils_get_locale_from_utf8(path));
@@ -1482,6 +1482,9 @@ G_MODULE_EXPORT void on_menu_open_selected_file1_activate(GtkMenuItem *menuitem,
 
 			filename = g_build_path(G_DIR_SEPARATOR_S, path, sel, NULL);
 
+			if (! g_file_test(filename, G_FILE_TEST_EXISTS)) // with ext ?
+				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
+
 			if (! g_file_test(filename, G_FILE_TEST_EXISTS) &&
 				app->project != NULL && !EMPTY(app->project->base_path))
 			{
@@ -1490,52 +1493,24 @@ G_MODULE_EXPORT void on_menu_open_selected_file1_activate(GtkMenuItem *menuitem,
 				SETPTR(path, utils_get_locale_from_utf8(path));
 				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, path, sel, NULL));
 			}
-#ifdef G_OS_UNIX
-			if (! g_file_test(filename, G_FILE_TEST_EXISTS))
-				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, "/usr/local/include", sel, NULL));
-
-			if (! g_file_test(filename, G_FILE_TEST_EXISTS))
-				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, "/usr/include", sel, NULL));
-#endif
-
-			 /*
-			  * Maybe the file extension was missing. Try the extension
-			  * of the current file type
-			  */
-			if (! g_file_test(filename, G_FILE_TEST_EXISTS))
-			{
-				SETPTR(path, utils_get_current_file_dir_utf8());
-				SETPTR(path, utils_get_locale_from_utf8(path));
-				if (!path)
-					path = g_get_current_dir();
-				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, path, sel, NULL));
-				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
-			}
-
-			if (! g_file_test(filename, G_FILE_TEST_EXISTS) &&
-				app->project != NULL && !EMPTY(app->project->base_path))
-			{
-				/* try the project's base path */
-				SETPTR(path, project_get_base_path());
-				SETPTR(path, utils_get_locale_from_utf8(path));
-				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, path, sel, NULL));
-				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
-			}
-
-#ifdef G_OS_UNIX
-			if (! g_file_test(filename, G_FILE_TEST_EXISTS))
-			{
-				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, "/usr/local/include", sel, NULL));
-				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
-			}
-
-			if (! g_file_test(filename, G_FILE_TEST_EXISTS))
-			{
-				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, "/usr/include", sel, NULL));
-				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
-			}
-#endif
 			g_free(path);
+
+			if (! g_file_test(filename, G_FILE_TEST_EXISTS)) // with ext ?
+				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
+
+#ifdef G_OS_UNIX
+			if (! g_file_test(filename, G_FILE_TEST_EXISTS))
+				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, "/usr/local/include", sel, NULL));
+
+			if (! g_file_test(filename, G_FILE_TEST_EXISTS)) // with ext ?
+				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
+
+			if (! g_file_test(filename, G_FILE_TEST_EXISTS))
+				SETPTR(filename, g_build_path(G_DIR_SEPARATOR_S, "/usr/include", sel, NULL));
+
+			if (! g_file_test(filename, G_FILE_TEST_EXISTS)) // with ext ?
+				SETPTR(filename, g_build_path(".", filename, ft->extension, NULL));
+#endif
 		}
 
 		if (g_file_test(filename, G_FILE_TEST_EXISTS))
