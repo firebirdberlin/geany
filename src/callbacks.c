@@ -1614,6 +1614,7 @@ G_MODULE_EXPORT void on_menu_project1_activate(GtkMenuItem *menuitem, gpointer u
 G_MODULE_EXPORT void on_menu_open_selected_file1_activate(GtkMenuItem *menuitem, gpointer user_data)
 {
 	GeanyDocument *doc = document_get_current();
+	GeanyFiletype *ft = doc->file_type;
 	gchar *sel = NULL;
 	const gchar *wc;
 
@@ -1669,6 +1670,8 @@ G_MODULE_EXPORT void on_menu_open_selected_file1_activate(GtkMenuItem *menuitem,
 		{
 			SETPTR(sel, utils_get_utf8_from_locale(sel));
 			ui_set_statusbar(TRUE, _("Could not open file %s (File not found)"), sel);
+
+			document_new_file(sel,ft,"TEST");
 		}
 
 		g_free(filename);
