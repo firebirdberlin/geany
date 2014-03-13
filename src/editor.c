@@ -3784,7 +3784,6 @@ void editor_select_matching_brace(GeanyEditor *editor)
 
 	match = sci_find_matching_brace(editor->sci, pos);
 
-
 	if (match != -1 && match != pos)
 	{	/* select text in between braces*/
 		if (match > pos) {

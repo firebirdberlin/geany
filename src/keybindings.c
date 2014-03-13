@@ -2425,7 +2425,7 @@ static gboolean cb_func_select_action(guint key_id)
 			editor_select_paragraph(doc->editor);
 			break;
 		case GEANY_KEYS_SELECT_TO_MATCHINGBRACE:
-			editor_select_matching_brace(doc->editor); //TODO
+			editor_select_matching_brace(doc->editor);
 			break;
 		case GEANY_KEYS_SELECT_WORDPARTLEFT:
 			sci_send_command(sci, SCI_WORDPARTLEFTEXTEND);
