@@ -1818,8 +1818,8 @@ static void cb_func_move_tab(guint key_id)
 
 static void goto_matching_brace(GeanyDocument *doc)
 {
-	gint pos, new_pos;
-	gint after_brace;
+	gint pos = -1, new_pos= -1;
+	gint after_brace = 0;
 
 	g_return_if_fail(DOC_VALID(doc));
 
@@ -1832,6 +1832,34 @@ static void goto_matching_brace(GeanyDocument *doc)
 	{	/* set the cursor at/after the brace */
 		sci_set_current_position(doc->editor->sci, new_pos + (!after_brace), FALSE);
 		editor_display_current_line(doc->editor, 0.5F);
+	}
+	else // We're somewhere in a block
+	{	 // ... and search backwards for a solitary opening brace
+		pos = sci_get_current_position(doc->editor->sci);
+
+		gint dismiss_braces_cnt = 0;
+		while (pos > 0)
+		{
+			pos--;
+			// count closing braces
+			if (utils_is_closing_brace(sci_get_char_at(doc->editor->sci, pos), FALSE))
+			{
+				dismiss_braces_cnt++;
+			}
+			else // count opening braces
+			if (utils_is_opening_brace(sci_get_char_at(doc->editor->sci, pos), FALSE))
+			{
+				 // found the matching brace
+				if (dismiss_braces_cnt == 0) break;
+				dismiss_braces_cnt--;
+			}
+		}
+
+		if (utils_is_opening_brace(sci_get_char_at(doc->editor->sci, pos), FALSE))
+		{
+			sci_set_current_position(doc->editor->sci, pos, FALSE);
+			editor_display_current_line(doc->editor, 0.5F);
+		}
 	}
 }
 
