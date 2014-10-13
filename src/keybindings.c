@@ -1833,31 +1833,28 @@ static void goto_matching_brace(GeanyDocument *doc)
 		sci_set_current_position(doc->editor->sci, new_pos + (!after_brace), FALSE);
 		editor_display_current_line(doc->editor, 0.5F);
 	}
-	else // We're somewhere in a block
-	{	 // ... and search backwards for a solitary opening brace
+	else
+	{	/* search backwards for a solitary opening brace */
 		pos = sci_get_current_position(doc->editor->sci);
 
 		gint dismiss_braces_cnt = 0;
 		while (pos > 0)
 		{
 			pos--;
-			// count closing braces
 			if (utils_is_closing_brace(sci_get_char_at(doc->editor->sci, pos), FALSE))
 			{
-				dismiss_braces_cnt++;
+				dismiss_braces_cnt++;  /*  count closing braces */
 			}
-			else // count opening braces
-			if (utils_is_opening_brace(sci_get_char_at(doc->editor->sci, pos), FALSE))
+			else if (utils_is_opening_brace(sci_get_char_at(doc->editor->sci, pos), FALSE))
 			{
-				 // found the matching brace
 				if (dismiss_braces_cnt == 0) break;
-				dismiss_braces_cnt--;
+				dismiss_braces_cnt--;  /* count opening braces */
 			}
 		}
 
 		if (utils_is_opening_brace(sci_get_char_at(doc->editor->sci, pos), FALSE))
 		{
-			sci_set_current_position(doc->editor->sci, pos, FALSE);
+			sci_set_current_position(doc->editor->sci, pos + 1, FALSE);
 			editor_display_current_line(doc->editor, 0.5F);
 		}
 	}
