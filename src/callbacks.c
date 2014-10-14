@@ -1446,23 +1446,37 @@ G_MODULE_EXPORT void on_menu_open_selected_file1_activate(GtkMenuItem *menuitem,
 	GeanyDocument *doc = document_get_current();
 	GeanyFiletype *ft  = doc->file_type;
 	gchar *sel 		   = NULL;
-	const gchar *wc;
-
+	const gchar *wc   = GEANY_WORDCHARS "./-";;
 
 #ifdef G_OS_WIN32
 	wc = GEANY_WORDCHARS "./-" "\\";
-#else
-	wc = GEANY_WORDCHARS "./-";
 #endif
 
 	g_return_if_fail(doc != NULL);
 
 	sel = editor_get_default_selection(doc->editor, TRUE, wc);
+	if (sel != NULL)
+	{ 	// replace occurences of dir seperating char '.'
+		gchar *suffix = g_strconcat(".", ft->extension, NULL);
+		gchar *replaced = g_strdup(sel);
+		int replaced_len = strlen(replaced);
+
+		if (g_str_has_suffix(replaced, suffix))
+		{
+			replaced_len -= strlen(suffix);
+		}
+
+		for (int i = 0; i < replaced_len; i++)
+		{ // todo make char to be replaced dependent on filetype
+			if (replaced[i] == '.') replaced[i] = '/';
+		}
+		SETPTR(sel, replaced);
+	}
+
 	SETPTR(sel, utils_get_locale_from_utf8(sel));
 
 	if (sel != NULL)
 	{
-
 		// (1) build the list of filename candidates +++++++++++++++++++
 
 		GSList* candidates 		= NULL;	// lists all filenames to test
